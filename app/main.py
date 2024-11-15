@@ -7,6 +7,11 @@ def connect(connection: socket.socket) -> None:
         connected: bool = True
         while connected:
             request: bytes = connection.recv(512)
+            print("Received {!r}".format(request))
+
+            arr_size, *arr = request.split(b"\r\n")
+            print(f"Arr size: {arr_size}")
+            print(f"Arr content: {arr}")
 
             connected = bool(request)
             if "ping" in request.decode().lower():
@@ -25,7 +30,9 @@ def main() -> None:
         print(f"Accepted connection [{client_addr[0]}:{str(client_addr[1])}]")
 
         # connect(client_socket)
-        thread: threading.Thread = threading.Thread(target=connect, args=[client_socket])
+        thread: threading.Thread = threading.Thread(
+            target=connect, args=[client_socket]
+        )
         thread.start()
 
 
