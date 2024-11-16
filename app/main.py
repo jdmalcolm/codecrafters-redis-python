@@ -1,8 +1,11 @@
 import socket  # noqa: F401
 import threading
 
+DB = {}
 
 def redis_encode(data, encoding="utf-8"):
+    if not data:
+        return "$-1\r\n".encode(encoding=encoding)
     if not isinstance(data, list):
         data = [data]
     separator = "\r\n"
@@ -19,16 +22,26 @@ def redis_encode(data, encoding="utf-8"):
 
 def request_set(request):
     if len(request) != 7:
+        print("ERROR: SET request with invalid num args")
         return redis_encode("ERROR")
-    # key = request[3]
-    # value = request[5]
+    key = request[3]
+    value = request[5]
+    DB[key] = value
+    print(f"Added to database: '{key}':'{value}")
     return redis_encode("OK")
 
 
 def request_get(request):
     if len(request) != 5:
+        print("ERROR: GET request with invalid num args")
         return redis_encode("ERROR")
-    return redis_encode("")
+    key = request[3]
+    value = DB.get(key)
+    if not value:
+        print(f"GET - Key '{key}' not found")
+        return redis_encode("")
+    print(f"Retrieved '{key}' from database: '{value}'")
+    return redis_encode(value.decode())
 
 
 def connect(connection: socket.socket) -> None:
