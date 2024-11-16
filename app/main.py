@@ -27,6 +27,8 @@ def connect(connection: socket.socket) -> None:
             connected = bool(request)
 
             arr_size, *arr = request.split(b"\r\n")
+            if arr_size == b"":
+                break
             print(f"Arr size: {arr_size}")
             print(f"Arr content: {arr}")
 
@@ -39,6 +41,8 @@ def connect(connection: socket.socket) -> None:
                                         for el in arr[3::2]])
                 print(f"Sending back: {response}")
                 connection.send(response)
+            else:
+                break
 
 
 def main() -> None:
