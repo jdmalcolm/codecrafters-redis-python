@@ -3,6 +3,7 @@ import threading
 
 DB = {}
 
+
 def redis_encode(data, encoding="utf-8"):
     if not data:
         return "$-1\r\n".encode(encoding=encoding)
@@ -62,20 +63,20 @@ def connect(connection: socket.socket) -> None:
             # PING
             if arr[1].lower() == b"ping":
                 response = redis_encode("PONG")
-            
+
             # ECHO
             elif arr[1].lower() == b"echo":
                 response = redis_encode([el.decode("utf-8")
                                         for el in arr[3::2]])
-            
+
             # SET
             elif arr[1].lower() == b"set":
                 response = request_set(arr)
-            
+
             # GET
             elif arr[1].lower() == b"get":
                 response = request_get(arr)
-                
+
             else:
                 break
 
