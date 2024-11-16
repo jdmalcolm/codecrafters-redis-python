@@ -1,5 +1,6 @@
 import socket  # noqa: F401
 import threading
+import time
 
 DB = {}
 
@@ -22,13 +23,26 @@ def redis_encode(data, encoding="utf-8"):
 
 
 def request_set(request):
-    if len(request) != 7:
+    request_len = len(request)
+    if request_len < 7:
         print("ERROR: SET request with invalid num args")
         return redis_encode("ERROR")
     key = request[3]
     value = request[5]
     DB[key] = value
     print(f"Added to database: '{key}':'{value}")
+
+    # if (request_len >= 9) and (request[7].lower() == b"px"):
+    #     print(f"Entry '{key}' will expire in {request[9]} ms")
+
+    #     def px(k):
+    #         time.sleep(float(request[9]) / 1000)
+    #         _ = DB.pop(k)
+    #         print(f"Entry '{k}' removed from database")
+
+    #     t = threading.Thread(px(key))
+    #     t.start()
+    
     return redis_encode("OK")
 
 
@@ -39,9 +53,9 @@ def request_get(request):
     key = request[3]
     value = DB.get(key)
     if not value:
-        print(f"GET - Key '{key}' not found")
+        print(f"GET - Key '{key.decode()}' not found")
         return redis_encode("")
-    print(f"Retrieved '{key}' from database: '{value}'")
+    print(f"Retrieved '{key.decode()}' from database: '{value.decode()}'")
     return redis_encode(value.decode())
 
 
