@@ -9,8 +9,8 @@ def redis_encode(data, encoding="utf-8"):
     size = len(data)
     encoded = []
     for datum in data:
-       encoded.append(f"${len(datum)}")
-       encoded.append(datum)
+        encoded.append(f"${len(datum)}")
+        encoded.append(datum)
     if size > 1:
         encoded.insert(0, f"*{size}")
     print(f"encoded: {encoded}")
@@ -24,13 +24,21 @@ def connect(connection: socket.socket) -> None:
             request: bytes = connection.recv(512)
             print("Received {!r}".format(request))
 
+            connected = bool(request)
+
             arr_size, *arr = request.split(b"\r\n")
             print(f"Arr size: {arr_size}")
             print(f"Arr content: {arr}")
 
-            connected = bool(request)
-            if "ping" in request.decode().lower():
-                connection.send(redis_encode("PONG"))
+            if arr[1].lower() == b"ping":
+                response = redis_encode("PONG")
+                print(f"Sending back: {response}")
+                connection.send(response)
+            elif arr[1].lower() == b"echo":
+                response = redis_encode([el.decode("utf-8")
+                                        for el in arr[3::2]])
+                print(f"Sending back: {response}")
+                connection.send(response)
 
 
 def main() -> None:
