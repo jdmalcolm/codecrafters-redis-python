@@ -2,6 +2,21 @@ import socket  # noqa: F401
 import threading
 
 
+def redis_encode(data, encoding="utf-8"):
+    if not isinstance(data, list):
+        data = [data]
+    separator = "\r\n"
+    size = len(data)
+    encoded = []
+    for datum in data:
+       encoded.append(f"${len(datum)}")
+       encoded.append(datum)
+    if size > 1:
+        encoded.insert(0, f"*{size}")
+    print(f"encoded: {encoded}")
+    return (separator.join(encoded) + separator).encode(encoding=encoding)
+
+
 def connect(connection: socket.socket) -> None:
     with connection:
         connected: bool = True
@@ -15,8 +30,7 @@ def connect(connection: socket.socket) -> None:
 
             connected = bool(request)
             if "ping" in request.decode().lower():
-                pong: str = "+PONG\r\n"
-                connection.send(pong.encode())
+                connection.send(redis_encode("PONG"))
 
 
 def main() -> None:
