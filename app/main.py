@@ -17,6 +17,20 @@ def redis_encode(data, encoding="utf-8"):
     return (separator.join(encoded) + separator).encode(encoding=encoding)
 
 
+def request_set(request):
+    if len(request) != 7:
+        return redis_encode("ERROR")
+    # key = request[3]
+    # value = request[5]
+    return redis_encode("OK")
+
+
+def request_get(request):
+    if len(request) != 5:
+        return redis_encode("ERROR")
+    return redis_encode("")
+
+
 def connect(connection: socket.socket) -> None:
     with connection:
         connected: bool = True
@@ -32,17 +46,28 @@ def connect(connection: socket.socket) -> None:
             print(f"Arr size: {arr_size}")
             print(f"Arr content: {arr}")
 
+            # PING
             if arr[1].lower() == b"ping":
                 response = redis_encode("PONG")
-                print(f"Sending back: {response}")
-                connection.send(response)
+            
+            # ECHO
             elif arr[1].lower() == b"echo":
                 response = redis_encode([el.decode("utf-8")
                                         for el in arr[3::2]])
-                print(f"Sending back: {response}")
-                connection.send(response)
+            
+            # SET
+            elif arr[1].lower() == b"set":
+                response = request_set(arr)
+            
+            # GET
+            elif arr[1].lower() == b"get":
+                response = request_get(arr)
+                
             else:
                 break
+
+            print(f"Sending back: {response}")
+            connection.send(response)
 
 
 def main() -> None:
