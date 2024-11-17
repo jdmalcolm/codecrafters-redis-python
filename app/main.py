@@ -25,10 +25,20 @@ def redis_encode(data, encoding="utf-8"):
     return (separator.join(encoded) + separator).encode(encoding=encoding)
 
 
+def delete_key(key: str):
+    """
+    Deletes entry from database.
+    """
+    if DB[key]:
+        del DB[key]
+        print(f"Entry '{key.decode()}' removed from database.")
+
+
 def request_set(request):
     """
     Processes a SET request, adding {key: value} pair to database.
     Basic request format: 'SET key value'
+    Add PX option to apply expiry in ms: 'SET key value PX 100'
     """
     request_len = len(request)
     if request_len < 7:
@@ -39,18 +49,12 @@ def request_set(request):
     DB[key] = value
     print(f"Added to database: '{key}':'{value}")
 
-
-
-    # if (request_len >= 9) and (request[7].lower() == b"px"):
-    #     print(f"Entry '{key}' will expire in {request[9]} ms")
-
-    #     def px(k):
-    #         time.sleep(float(request[9]) / 1000)
-    #         _ = DB.pop(k)
-    #         print(f"Entry '{k}' removed from database")
-
-    #     t = threading.Thread(px(key))
-    #     t.start()
+    # Apply expiration if PX option used
+    if (request_len >= 9) and (request[7].lower() == b"px"):
+        expiry_ms = float(request[9])
+        print(f"Entry '{key}' set to expire in {expiry_ms} ms")
+        t = threading.Timer(expiry_ms / 1000, delete_key, args=(key,))
+        t.start()
     
     return redis_encode("OK")
 
