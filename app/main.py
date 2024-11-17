@@ -124,7 +124,10 @@ def arg_parser():
     Parse arguments from bash cli.
     """
     parser = argparse.ArgumentParser(
-        prog="test", description="test", epilog="test")
+        prog="Build your own Redis",
+        description="Launches Redis-like application.  After running, interact with the application using the `redis-cli` command in a new terminal.",
+        epilog="test"
+    )
     args = parser.parse_args()
     return None
 
