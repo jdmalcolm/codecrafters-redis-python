@@ -112,6 +112,10 @@ def connect(connection: socket.socket) -> None:
             # GET
             elif arr[1].lower() == b"get":
                 response = request_get(arr)
+            
+            # INFO
+            elif arr[1].lower() == b"info":
+                response = redis_encode("role:master")
 
             else:
                 break
