@@ -6,6 +6,9 @@ DB = {}
 
 
 def redis_encode(data, encoding="utf-8"):
+    """
+    Applies redis serialization to a string and encodes it.
+    """
     if not data:
         return "$-1\r\n".encode(encoding=encoding)
     if not isinstance(data, list):
@@ -23,6 +26,10 @@ def redis_encode(data, encoding="utf-8"):
 
 
 def request_set(request):
+    """
+    Processes a SET request, adding {key: value} pair to database.
+    Basic request format: 'SET key value'
+    """
     request_len = len(request)
     if request_len < 7:
         print("ERROR: SET request with invalid num args")
@@ -31,6 +38,8 @@ def request_set(request):
     value = request[5]
     DB[key] = value
     print(f"Added to database: '{key}':'{value}")
+
+
 
     # if (request_len >= 9) and (request[7].lower() == b"px"):
     #     print(f"Entry '{key}' will expire in {request[9]} ms")
@@ -47,6 +56,10 @@ def request_set(request):
 
 
 def request_get(request):
+    """
+    Processes a GET request, returning value corresponding to the given key in the database.
+    Returns null response if key not found.
+    """
     if len(request) != 5:
         print("ERROR: GET request with invalid num args")
         return redis_encode("ERROR")
@@ -60,6 +73,9 @@ def request_get(request):
 
 
 def connect(connection: socket.socket) -> None:
+    """
+    Processes connection and provides responses to various requests.
+    """
     with connection:
         connected: bool = True
         while connected:
