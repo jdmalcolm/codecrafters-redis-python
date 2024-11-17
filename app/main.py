@@ -1,3 +1,4 @@
+import argparse
 import socket  # noqa: F401
 import threading
 import time
@@ -55,7 +56,7 @@ def request_set(request):
         print(f"Entry '{key}' set to expire in {expiry_ms} ms")
         t = threading.Timer(expiry_ms / 1000, delete_key, args=(key,))
         t.start()
-    
+
     return redis_encode("OK")
 
 
@@ -118,9 +119,20 @@ def connect(connection: socket.socket) -> None:
             connection.send(response)
 
 
+def arg_parser():
+    """
+    Parse arguments from bash cli.
+    """
+    parser = argparse.ArgumentParser(
+        prog="test", description="test", epilog="test")
+    args = parser.parse_args()
+    return None
+
+
 def main() -> None:
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!")
+
+    args = arg_parser()
 
     server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
 
