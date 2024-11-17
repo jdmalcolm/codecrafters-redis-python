@@ -4,6 +4,7 @@ import threading
 import time
 
 DB = {}
+DEFAULT_PORT = 6379
 
 
 def redis_encode(data, encoding="utf-8"):
@@ -119,25 +120,30 @@ def connect(connection: socket.socket) -> None:
             connection.send(response)
 
 
-def arg_parser():
+def arg_parser() -> argparse.Namespace:
     """
     Parse arguments from bash cli.
     """
     parser = argparse.ArgumentParser(
         prog="Build your own Redis",
-        description="Launches Redis-like application.  After running, interact with the application using the `redis-cli` command in a new terminal.",
-        epilog="test"
+        description="Launches Redis-like application. After running, \
+            interact with the application using the `redis-cli` command in a \
+            new terminal."
     )
+    parser.add_argument('--port')
     args = parser.parse_args()
-    return None
+    return args
 
 
 def main() -> None:
     print("Logs from your program will appear here!")
 
+    port = DEFAULT_PORT
     args = arg_parser()
+    if args.port:
+        port = int(args.port)
 
-    server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
+    server_socket = socket.create_server(("localhost", port), reuse_port=True)
 
     while True:
         client_socket, client_addr = server_socket.accept()  # wait for client
